@@ -22,13 +22,16 @@ const order = (props) => {
   if (!props._sort) {
     return '';
   }
-  const sort = (typeof props._sort === 'string')
-    ? { [props._sort]: 'ASC' }
-    : props._sort;
+  const sort = A(props._sort).map(part => {
+    const bits = part.split(':');
+    return {
+      name: bits.shift(),
+      dir: bits.join(':').toUpperCase() === 'DESC' ? 'DESC' : 'ASC'
+    };
+  });
   return `ORDER BY ${
-    Object.keys(sort).sort().map(name => {
-      const desc = sort[name].toUpperCase() === 'DESC';
-      return `\`${name}\` ${desc ? 'DESC' : 'ASC'}`
+    sort.map(part => {
+      return `\`${part.name}\` ${part.dir}`
     }).join(', ')
   }`;
 };

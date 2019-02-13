@@ -57,12 +57,9 @@ describe('Table', () => {
       it('filters', () => {
         expect(table.find({ age: 4 }).length).toBe(3);
       });
-      it('handle object sort', () => {
+      it('handle complex sort', () => {
         const result = table.find({
-          _sort: {
-            age: 'asc',
-            name: 'desc'
-          },
+          _sort: [ 'age:asc', 'name:desc' ],
           age: 4
         });
         expect(result[0].name).toBe('Oregano');
@@ -76,7 +73,7 @@ describe('Table', () => {
       });
       it('obeys offsets', () => {
         const result = table.find({
-          _sort: { age: 'asc', name: 'asc' },
+          _sort: [ 'age', 'name' ],
           _limit: 1,
           _offset: 3
         });
