@@ -4,7 +4,7 @@ A Dead-simple ORM for Node
 
 ## What does this do?
 
-Allows you to use an better-sqlite3 store for your node app with queries precomposed from your types.
+Allows you to use a better-sqlite3 store for your node app with queries precomposed from your types.
 
 ## How do I use this?
 

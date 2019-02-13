@@ -2,9 +2,10 @@
   "name": "ormie",
   "version": "1.0.0",
   "description": "Dead-simple ORM for node using better-sqlite3",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "webpack-cli"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,9 @@
   "homepage": "https://github.com/Fordi/ormie#readme",
   "devDependencies": {
     "better-sqlite3": "^5.4.0",
-    "jest": "^24.1.0"
+    "jest": "^24.1.0",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.3"
   },
   "jest": {
     "verbose": true,
@@ -37,5 +40,9 @@
       "html",
       "text-summary"
     ]
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "public": true
   }
 }
