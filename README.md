@@ -54,7 +54,9 @@ Once you have your table, you can start making queries:
 cats.create();
 
 // Add a cat
+cats.insert({ name: 'Allspice', age: 4 });
 cats.insert({ name: 'Nutmeg', age: 4 });
+cats.insert({ name: 'Pepper', age: 13 });
 
 // Find cats matching a description
 cats.find({ name: 'Nutmeg' });
