@@ -2,9 +2,6 @@
  * Dead simple JS ORM
  **/
 const {
-  where,
-  order,
-  limit,
   select,
   remove,
   insert,

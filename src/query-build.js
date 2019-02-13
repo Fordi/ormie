@@ -1,119 +1,109 @@
+const memoized = (memo, key, maker) => {
+  if (!memo[key]) {
+    memo[key] = maker();
+  }
+  return memo[key];
+};
 
 const where = (props, prefix) => {
-  const names = Object.keys(props||{}).filter(name => name[0] !== '_');
-  if (names.length > 0) {
-    return 'WHERE ' + names.map(name => name + ' = @' + (prefix ? prefix : '') + name).join(' AND ');
+  const names = Object.keys(props || {})
+    .filter(name => name[0] !== '_');
+  if (names.length === 0) {
+    return '';
   }
-  return '';
+  return `WHERE ${
+    names.map(name => (
+      `${name} = @${prefix||''}${name}`
+    )).join(' AND ')
+  }`;
 };
 
 const order = (props) => {
-  const query = [];
-  if (props._sort) {
-    query.push('ORDER BY');
-    if (typeof props._sort === 'string') {
-      query.push('`' + props._sort + '`');
-    } else {
-      query.push(
-        Object.keys(props._sort).map(name => (
-          '`' + name + '` ' + (props._sort[name].toLowerCase() === 'desc' ? 'DESC' : 'ASC')
-        )).join(', ')
-      );
-    }
+  if (!props._sort) {
+    return '';
   }
-  return query.join(' ');
+  const sort = (typeof props._sort === 'string')
+    ? { [props._sort]: 'ASC' }
+    : props._sort;
+  return `ORDER BY ${
+    Object.keys(sort).sort().map(name => {
+      const desc = sort[name].toUpperCase() === 'DESC';
+      return `\`${name}\` ${desc ? 'DESC' : 'ASC'}`
+    }).join(', ')
+  }`;
 };
 
 const limit = (props) => {
-  const query = [];
-  if ('_limit' in props) {
-    query.push('LIMIT @_limit');
-    if ('_offset' in props) {
-      query.push('OFFSET @_offset');
-    }
+  if (!('_limit' in props)) {
+    return '';
   }
-  return query.join(' ');
+  return `LIMIT @_limit${
+    '_offset' in props
+      ? ' OFFSET @_offset'
+      : ''
+  }`;
 };
 
 const select = (table, properties) => {
   const props = properties || {};
   const columns = (props._cols || Object.keys(table.schema)).sort();
   const query = [
-    'SELECT ' + columns.join(', ') + ' from `' + table.name + '`',
+    `SELECT ${columns.join(', ')} FROM \`${table.name}\``,
     where(props),
     order(props),
     limit(props)
   ].filter(a => !!a).join(' ');
-
-  if (!table.memo[query]) {
-    table.memo[query] = table.db.prepare(query);
-  }
-  return table.memo[query];
+  return memoized(table.memo, query, () => table.db.prepare(query));
 };
 
 const remove = (table, props) => {
   const query = [
-    'DELETE from `' + table.name + '`',
+    `DELETE FROM \`${table.name}\``,
     where(props)
   ].filter(a => !!a).join(' ');
-  if (!table.memo[query]) {
-    table.memo[query] = table.db.prepare(query);
-  }
-  return table.memo[query];
+  return memoized(table.memo, query, () => table.db.prepare(query));
 };
 
 const insert = (table) => {
-  if (!table.memo.INSERT) {
+  return memoized(table.memo, 'INSERT', () => {
     const cols = Object.keys(table.schema);
-    table.memo.INSERT = table.db.prepare(
-      'INSERT INTO `' + table.name + '` ('
-        + cols.join(', ')
-      + ') VALUES ('
-        + cols.map(col => '@' + col).join(', ')
-      + ')'
+    const names = cols.join(', ');
+    const values = cols.map(col => `@${col}`).join(', ');
+    return table.db.prepare(
+      `INSERT INTO \`${table.name}\` (${names}) VALUES (${values})`
     );
-  }
-  return table.memo.INSERT;
+  });
 };
 
 const create = (table) => {
-  if (!table.memo.CREATE) {
-    const cols = Object.keys(table.schema);
-    const query = [
-      'CREATE TABLE IF NOT EXISTS `',
-      table.name,
-      '` (',
-      cols.map(col => {
-        return col + ' ' + table.schema[col];
-      }).join(', '),
-      ')'
-    ].join('');
-    table.memo.CREATE = table.db.prepare(query);
-  }
-  return table.memo.CREATE;
+  return memoized(table.memo, 'CREATE', () => {
+    const cols = Object.keys(table.schema).map(col => (
+      `\`${col}\` ${table.schema[col]}`
+    ));
+    return table.db.prepare(
+      `CREATE TABLE IF NOT EXISTS \`${table.name}\` (${cols})`
+    );
+  });
 };
 
 const drop = (table) => {
-  if (!table.memo.DROP) {
-    const query = 'DROP TABLE `' + table.name + '`';
-    table.memo.DROP = table.db.prepare(query);
-  }
-  return table.memo.DROP;
+  return memoized(table.memo, 'DROP', () => {
+    return table.db.prepare(
+      `DROP TABLE \`${table.name}\``
+    );
+  });
 };
 
 const update = (table, props, clause) => {
-  const names = Object.keys(props).join(', ');
-  const values = Object.keys(props).map(name => name + ' = @value_' + name).join(', ');
+  const values = Object.keys(props).map(name => (
+    `${name} = @value_${name}`
+  )).join(', ');
 
   const query = [
-    'UPDATE OR REPLACE `' + table.name + '` SET ' + values + '',
+    `UPDATE OR REPLACE \`${table.name}\` SET ${values}`,
     where(clause, 'clause_')
   ].filter(a => !!a).join(' ');
-  if (!table.memo[query]) {
-    console.log(query);
-    table.memo[query] = table.db.prepare(query);
-  }
-  return table.memo[query];
+  return memoized(table.memo, query, () => table.db.prepare(query));
 };
 
 const mergeUpdate = (props, clause) => {
@@ -126,10 +116,8 @@ const mergeUpdate = (props, clause) => {
   });
   return out;
 };
+
 module.exports = {
-  where,
-  order,
-  limit,
   select,
   remove,
   insert,
