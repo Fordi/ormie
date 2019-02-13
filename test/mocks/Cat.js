@@ -2,7 +2,7 @@ class Cat {
   static get tableName() { return 'cats'; }
   static get schema() {
     return {
-      name: 'text',
+      name: 'text primary key',
       age: 'integer'
     }
   }
