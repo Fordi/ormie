@@ -30,7 +30,7 @@ class Cat {
 }
 ```
 
-Create an ORMie table from the database and type:
+Create an Ormie table from the database and type:
 
 ```javascript
 const Ormie = require('ormie');
