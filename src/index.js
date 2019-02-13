@@ -42,8 +42,8 @@ class Table {
   find(props, skipInst) {
     const stmt = select(this, props);
     const result = props ? stmt.all(props) : stmt.all();
-    if (props && props._cols && props._cols.length === 1) {
-      return result.map(res => res[props._cols[0]]);
+    if (props && props._cols && typeof props._cols === 'string') {
+      return result.map(res => res[props._cols]);
     }
     if (this.Type instanceof Function && !skipInst && !(props && props._cols)) {
       return result.map(res => new this.Type(res));
@@ -53,8 +53,8 @@ class Table {
   first(props, skipInst) {
     const stmt = select(this, props);
     const result = props ? stmt.get(props) : stmt.get();
-    if (props && props._cols && props._cols.length === 1) {
-      return result && result[props._cols[0]];
+    if (props && props._cols && typeof props._cols === 'string') {
+      return result && result[props._cols];
     }
     if (this.Type instanceof Function && !skipInst && !(props && props._cols)) {
       return result && new this.Type(result);

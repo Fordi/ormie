@@ -44,9 +44,11 @@ const limit = (props) => {
   }`;
 };
 
+const A = (s) => Array.isArray(s) ? s : [s];
+
 const select = (table, properties) => {
   const props = properties || {};
-  const columns = (props._cols || Object.keys(table.schema)).sort();
+  const columns = A(props._cols || Object.keys(table.schema)).sort();
   const query = [
     `SELECT ${columns.join(', ')} FROM \`${table.name}\``,
     where(props),

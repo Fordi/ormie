@@ -1,0 +1,7 @@
+[
+  { "name": "Pepper",   "age": 13 },
+  { "name": "Nutmeg",   "age":  4 },
+  { "name": "Allspice", "age":  4 },
+  { "name": "Musashi",  "age":  8 },
+  { "name": "Oregano",  "age":  4 }
+]
