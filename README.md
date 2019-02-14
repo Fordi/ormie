@@ -59,16 +59,19 @@ cats.insert({ name: 'Nutmeg', age: 4 });
 cats.insert({ name: 'Pepper', age: 13 });
 
 // Find cats matching a description
-cats.find({ name: 'Nutmeg' });
+cats.find({ age: 4 });
 
-> [ Cat { name: 'Nutmeg', age: 4 } ]
+> [
+  Cat { name: 'Nutmeg', age: 4 },
+  Cat { name: 'Allspice', age: 4 }
+]
 
 // Find just one cat
-cats.first({ name: 'Nutmeg' });
+cats.first({ name: 'Pepper' });
 
-> Cat { name: 'Nutmeg', age: 4 }
+> Cat { name: 'Pepper', age: 13 }
 
-// Get the age of a named cat
+// Get _just_ one column
 
 cats.first({ name: 'Nutmeg', _cols: 'age' })
 
